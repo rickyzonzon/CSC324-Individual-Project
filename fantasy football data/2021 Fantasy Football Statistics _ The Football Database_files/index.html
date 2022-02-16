@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<!-- saved from url=(0096)https://s0.2mdn.net/sadbundle/16897136797137760206/Display_SparkLTO_A_728x90_Animated/index.html -->
+<html><head xmlns="http://www.w3.org/1999/xhtml"><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  
+  <meta name="ad.size" content="width=728,height=90">
+  <title>CapitalOne 728x90</title>
+  <script type="text/javascript">
+    var clickTag = "https://www.capitalone.com/small-business/credit-cards/";
+  </script>
+  <script src="./jquery.min.js.download"></script>
+    <script src="./TweenMax.min.js.download"></script>
+    <script src="./CSSPlugin.min.js.download"></script>
+  <style>
+  @charset "utf-8";
+
+  /* CSS Document */
+  @font-face {
+    font-family: 'Optimist_Bd';
+    src:
+    url('Optimist_Bold.woff2') format('woff2'),
+		url('Optimist_Bold.woff') format('woff');
+  }
+
+  @font-face {
+    font-family: 'Optimist_Rg';
+    src:
+    url('Optimist.woff2') format('woff2'),
+		url('Optimist.woff') format('woff');
+  }
+
+
+
+  body {
+    margin: 0;
+    font-family: 'Optimist_Bd','Helvetica Neue', Arial, sans-serif;
+  }
+
+  #container {
+    width: 728px;
+    height: 90px;
+    position: relative;
+    overflow: hidden;
+    border: 1px solid #ACACAC;
+    background-color: #023e5a;
+    box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    -webkit-box-sizing: border-box;
+  }
+
+  img {
+    border: none;
+  }
+
+  .object {
+    position: absolute;
+    opacity: 0;
+    width: 100%;
+  }
+  .object.text {
+    width: auto;
+    color: #ffffff;
+    top: 25px;
+  }
+
+  #text-1 {
+    left: 160px;
+    top: 18px;
+    font-size: 30px;
+    line-height: 31px;
+  }
+
+  .text-1 span.span-1 {
+    display: block;
+  }
+
+  .text-1 span.span-2 {
+    display: block;
+  }
+
+  .text-1 span.span-3 {
+    display: block;
+  }
+
+  #text-2 {
+    left: 160px;
+    top: 27px;
+  }
+
+  .text-2 span.span-1 {
+    font-size: 28px;
+    line-height: 21px;
+    display: block;
+  }
+
+  .text-2 span.span-3 {
+    font-size: 18px;
+    line-height: 21px;
+    margin: -18px 0 -12px;
+    display: block;
+    font-family: 'Optimist_Rg','Helvetica Neue', Arial, sans-serif;
+  }
+
+  #text-3 {
+    left: 160px;
+    top: 18px;
+    font-size: 30px;
+    line-height: 31px;
+    z-index: 2;
+  }
+  .text-3 span.span-1 {
+    display: block;
+  }
+
+  .text-3 span.span-2 {
+    display: block;
+  }
+
+  .text-3 span.span-3 {
+    display: block;
+  }
+
+  #logo {
+    width: 110px;
+    left: 20px;
+    top: 15px;
+  }
+
+  #banner {
+    top: 0;
+    left: 470px;
+    width: 88px;
+  }
+
+  #line1 {
+    left: 336px;
+    top: 46px;
+    width: 33px;
+    height: 3px;
+    background: #e8ab27;
+    opacity: 0;
+    z-index: 1;
+  }
+
+  #line2 {
+    left: 377px;
+    top: 46px;
+    width: 58px;
+    height: 3px;
+    background: #e8ab27;
+    opacity: 0;
+    z-index: 1;
+  }
+
+  #bannerText {
+    top: 8px;
+    left: 480px;
+    text-align: center;
+    font-size: 16px;
+    line-height: .95;
+    color: #023e5a;
+    text-transform: uppercase;
+  }
+
+  #card-lg {
+    top: 5px;
+    width: 125px;
+    left: 700px;
+    z-index: 2;
+  }
+
+  #button {
+    top: 28px;
+    opacity: 0;
+    left: 590px;
+    transition: 100ms;
+  }
+
+  #button:hover {
+    transform: scale(1.1);
+  }
+
+.subscribe-button {
+  cursor: pointer;
+  border-radius: 4px;
+  font-size: 14px;
+  line-height: 33px;
+  font-family: 'Optimist_Bd','Helvetica Neue', Arial, sans-serif;
+  color: #023e5a;
+  text-align: center;
+  position: relative;
+  overflow: hidden;
+  transition: 0.6s;
+  width: 112px;
+  height: 33px;
+  border: none;
+  outline: none;
+  background-color: #ffffff;
+}
+
+  </style>
+<script type="text/javascript">
+    
+  (function() {
+    var MAX_URL_PARAM_LENGTH = 34;
+    var CLICK_X_URL_KEY = 'nx';
+    var CLICK_Y_URL_KEY = 'ny';
+    var CREATIVE_DIMENSIONS_KEY = 'dim';
+    var AD_URL_PARAM = '&adurl=';
+
+    var relegateNavigation = '';
+    var urlParamMap = {};
+
+    urlParamMap[CLICK_X_URL_KEY] = null;
+    urlParamMap[CLICK_Y_URL_KEY] = null;
+    urlParamMap[CREATIVE_DIMENSIONS_KEY] = null;
+
+    var handleClickTagMessage = function(e) {
+      try {
+        var eventData = JSON.parse(e.data);
+      } catch (err) {
+        return;
+      }
+      if (eventData.isInitClickTag) {
+        if (eventData.clickTags) {
+          for (var i = 0; i < eventData.clickTags.length; i++) {
+            var clkTag = eventData.clickTags[i];
+            window[clkTag.name] = clkTag.url;
+          }
+        } else if (eventData.clickTag) {
+          window.clickTag = eventData.clickTag;
+        }
+        relegateNavigation = eventData.relegateNavigation;
+      }
+    };
+
+    var storeClickCoordinates = function(e) {
+      urlParamMap[CLICK_X_URL_KEY] = Math.round(e.clientX);
+      urlParamMap[CLICK_Y_URL_KEY] = Math.round(e.clientY);
+    };
+
+    var getCreativeDimensions = function() {
+      return window.innerWidth + 'x' + window.innerHeight;
+    }
+
+    var getExitClickParams = function(e) {
+      urlParamMap[CREATIVE_DIMENSIONS_KEY] = getCreativeDimensions();
+
+      var exitParams = '';
+      for (var key in urlParamMap) {
+        exitParams += '&' + key + '=';
+        if (urlParamMap[key] !== null) {
+          exitParams += urlParamMap[key];
+        }
+      }
+      return exitParams;
+    }
+
+    var appendExitClickParams = function(url) {
+      var adUrlIndex = url.toLowerCase().indexOf(AD_URL_PARAM);
+      var paramsToBeAdded = getExitClickParams();
+      if (adUrlIndex > -1 && paramsToBeAdded.length <= MAX_URL_PARAM_LENGTH) {
+        url = url.substr(0, adUrlIndex) + paramsToBeAdded +
+          url.substr(adUrlIndex);
+      };
+      return url;
+    };
+
+    if (open.call) {
+      window.open = function(open) {
+        return function(url, name, features) {
+          url = appendExitClickParams(url);
+          if (relegateNavigation === 'parent') {
+            var message = {'clickTag': url, 'isPostClickTag': true};
+            parent.postMessage(JSON.stringify(message), '*');
+          } else {
+            var args = [url, name];
+            if (features) {
+              args.push(features);
+            }
+            open.apply(window, args);
+          }
+        };
+      }(window.open);
+    }
+
+    if (window.addEventListener) {
+      window.addEventListener(
+          'message', handleClickTagMessage, false);
+      window.addEventListener('mousedown', storeClickCoordinates, true);
+    } else {
+      window.attachEvent('onmessage', handleClickTagMessage);
+    }
+  })();
+    
+  </script></head>
+
+<body>
+  <a href="javascript:void(0);" id="clickTag" draggable="false" onclick="window.open(clickTag)">
+    <div id="container">
+
+        <img id="card-lg" class="object" src="./card-lg.png" alt="" style="opacity: 1; left: 850px;">
+        <img id="banner" class="object" src="./banner.png" alt="" style="opacity: 1;">
+        <div id="bannerText" class="object text" alt="" style="opacity: 1;">
+          Limited-<br>Time<br>Offer
+        </div>
+        <img id="logo" class="object" src="./logo-stacked.svg" aria-label="CapitalOne Logo" style="opacity: 1;"></div>
+        <div id="text-1" class="object text text-1" style="opacity: 0;"><span class="span-1">Earn up to a $3,000</span><span class="span-2">cash bonus.</span></div>
+        <div id="text-2" class="object text text-2" style="opacity: 0;"><span class="span-1">Plus, unlimited 2% cash back</span><br><span class="span-3">on every business purchase, everywhere.</span></div>
+        <div id="text-3" class="object text text-3" style="opacity: 1;"><span class="span-1">Earn up to a $3,000</span><span class="span-2">cash bonus.</span></div>
+        <div id="line1" class="object" alt="" style="opacity: 1;"></div>
+        <div id="line2" class="object" alt="" style="opacity: 1;"></div>
+        <!-- <div id="text-4" class="object text text-4"><span class="span-1">Plus, unlimited 2% cash back.</span></div> -->
+        <div id="button" class="object text" style="opacity: 1;">
+          <div class="button-wrapper">
+          <button class="subscribe-button">Apply Now</button>
+        </div>
+      </div>
+
+    
+
+  </a>
+
+<script>
+var count =0;
+if (window.attachEvent) {
+	window.attachEvent('onload', Loaded);
+}
+else if (window.addEventListener) {
+	window.addEventListener('load', Loaded, false);
+}
+else {
+	document.addEventListener('load', Loaded, false);
+}
+
+function Loaded() {
+    startAnimation();
+}
+
+function startAnimation() {
+	count++
+  //Frame 2
+	TweenLite.to("#card-lg", .5, {opacity: 1, delay: .1});
+	TweenLite.to("#card-lg", 1.25, {left: 625, delay: .1});
+  TweenLite.to("#card-lg", .25, {left: 850, ease: Quad.easeIn, delay: 1.5});
+	TweenLite.to("#logo", 0.25, {opacity: 1, ease: Quad.easeIn, delay: 1.6});
+	TweenLite.to("#banner", 0.25, {opacity: 1, ease: Quad.easeIn, delay: 1.8});
+	TweenLite.to("#bannerText", 0.25, {opacity: 1, ease: Quad.easeIn, delay: 1.85});
+	TweenLite.to("#text-1", .5, {opacity: 1, delay: 2.1});
+	TweenLite.to("#text-1", .25, {opacity: 0, delay: 4.9});
+  TweenLite.to("#banner", 0.25, {opacity: 0, ease: Quad.easeIn, delay: 4.9});
+	TweenLite.to("#bannerText", 0.25, {opacity: 0, ease: Quad.easeIn, delay: 4.9});
+  //Frame 2
+	TweenLite.to("#text-2", .5, {opacity: 1, delay: 5.7});
+  TweenLite.to("#text-2", .25, {opacity: 0, delay: 8.4});
+  //Frame 3
+  TweenLite.to("#banner", 0.25, {opacity: 1, ease: Quad.easeIn, delay: 8.7});
+	TweenLite.to("#bannerText", 0.25, {opacity: 1, ease: Quad.easeIn, delay: 8.7});
+	TweenLite.to("#text-3", .5, {opacity: 1, delay: 9.3});
+  TweenLite.to("#line1", .5, {opacity: 1, delay: 9.3});
+  TweenLite.to("#line2", .5, {opacity: 1, delay: 9.3});
+  //Frame 4
+  TweenLite.to("#button", .25, {opacity: 1, delay: 9.8});
+
+  if(count<3)
+  {
+	  TweenLite.to(".object", .25, {opacity: 0, ease: Quad.easeIn, delay: 15});
+		TweenLite.set("#text-3", {opacity: 0, delay: 15});
+  	TweenLite.set("#card-lg", {left:700, delay: 15});
+  	setTimeout(function(){ startAnimation();   }, 15000);
+  }
+}
+</script>
+
+</body></html>
