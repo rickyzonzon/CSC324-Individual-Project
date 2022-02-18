@@ -12,8 +12,6 @@ raw_wr <- read_csv("fantasy football data/wr_stats_and_projections.csv")
 #  geom_histogram(mapping = aes(x = `2020 FPTS`), fill = "red", binwidth = 3)
 
 # mutating datasets
-#ppr_rb <- mutate()
-
 rb_2019 <- mutate(select(raw_rb, `PLAYER NAME`, `2019 CAR`, `2019 RUSH YDS`, 
                          `2019 RUSH AVG`, `2019 RUSH TD`, `2019 REC`, 
                          `2019 REC YDS`, `2019 REC TDS`, `2019 FPTS`),
@@ -21,6 +19,8 @@ rb_2019 <- mutate(select(raw_rb, `PLAYER NAME`, `2019 CAR`, `2019 RUSH YDS`,
                   `2019 ALL TCH` = `2019 REC` + `2019 CAR`,
                   `2019 CAR %` = `2019 CAR` / `2019 REC`,
                   `2019 REC %` = 1 / `2019 CAR %`)
+
+  # fix the long term datasets (repetitive data + bad variable naming)
 
 # plot stuff
 
@@ -46,5 +46,6 @@ rb_2019 <- mutate(select(raw_rb, `PLAYER NAME`, `2019 CAR`, `2019 RUSH YDS`,
 #   xlab("2019 Fantasy Points") +
 #   ylab("2019 Receptions")
 
+  # plotting relationship between rb fantasy points vs receiving vs rushing over time
 
   
