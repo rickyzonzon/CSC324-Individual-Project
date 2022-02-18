@@ -13,38 +13,55 @@ defense_page <- "fantasy football data/defense.html"
 #kicker <- read_html(kicker_page)
 defense <- read_html(defense_page)
 
-team <- defense %>%
-  html_nodes("body") %>%
-  xml_find_all("//span[contains(@class, 'hidden-xs')]") %>%
-  html_text()
-
-table <- defense %>%
-  html_nodes("body") %>%
-  xml_find_all("//tbody[@aria-live = 'polite']")
-
-size_rows <- length(html_children(table))
-size_values <- length(html_children(html_children(table)))
-
-teams <- c()
-points <- c()
-sacks <- c()
-ints <- c()
-safeties <- c()
-fumble_recoveries <- c()
-blocks <- c()
-TDs <- c()
-PAs <- c()
-pass_yds_per_game <- c()
-russ_yds_per_game <- c()
-tot_yds_per_game <- c()
-
-for (values in 1:size_values){
-  if ((values %% (size_values / size_rows)) + 1 == 1){
-    append()
-  }
-  
+table <- function(html){
+  html %>%
+    html_nodes("body") %>%
+    xml_find_all("//tbody[@aria-live = 'polite']") %>%
+    return()
 }
 
+rows <- html_children(table(defense))
 
+values <- function(row){
+  return(html_children(row))
+}
 
+def_data <- tibble(
+  teams = c("a"),
+  points = c(1),
+  sacks = c(1),
+  ints = c(1),
+  safeties = c(1),
+  fumble_recoveries = c(1),
+  blocks = c(1),
+  TDs = c(1),
+  PA = c(1),
+  pass_yds_per_game = c(1),
+  russ_yds_per_game = c(1),
+  tot_yds_per_game = c(1)
+)
+
+for (row in 1:length(rows)){
+  
+  team <- html_text(html_element(html_children(rows), xpath = "//span[@class = 'hidden-xs']")[row])
+  new_row <- c()
+  
+  for (value in 3:length(values(rows[row]))){
+    new_row <- c(new_row, readr::parse_double(html_text(html_children(rows[row])[value])))
+  }
+  
+  def_data <- add_row(def_data, 
+                      teams = team, 
+                      points = new_row[1],
+                      sacks = new_row[2],
+                      ints = new_row[3],
+                      safeties = new_row[4],
+                      fumble_recoveries = new_row[5],
+                      blocks = new_row[6],
+                      TDs = new_row[7],
+                      PA = new_row[8],
+                      pass_yds_per_game = new_row[9],
+                      russ_yds_per_game = new_row[10],
+                      tot_yds_per_game = new_row[11])
+}
 
