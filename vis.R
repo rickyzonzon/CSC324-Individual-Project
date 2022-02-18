@@ -37,14 +37,14 @@ rb_2019 <- mutate(select(raw_rb, `PLAYER NAME`, `2019 CAR`, `2019 RUSH YDS`,
 #   xlab("2019 Fantasy Points") +
 #   ylab("2019 Receptions")
   
-ggplot(rb_2019, aes(x = `2019 CAR`, y = `2019 REC`)) +
-  geom_jitter(aes(size = `2019 FPTS`, color = (`2019 REC %` > 0.35)), show.legend = TRUE) +
-  geom_smooth(data = filter(rb_2019, `2019 REC %` >= 0.35), color = "dark cyan", se = FALSE) +
-  geom_smooth(data = filter(rb_2019, `2019 REC %` < 0.35), color = "dark red", se = FALSE)
-#  scale_color_discrete(name = "2019 R:C ratio", labels = c("< 0.35", ">= 0.35", "NA")) +
-#  scale_size_continuous(name = "2019 Carries") +
-#  xlab("2019 Fantasy Points") +
-#  ylab("2019 Receptions")
+# ggplot(rb_2019, aes(x = `2019 CAR`, y = `2019 REC`)) +
+#   geom_jitter(aes(size = `2019 FPTS`, color = (`2019 REC %` > 0.35)), show.legend = TRUE) +
+#   geom_smooth(data = filter(rb_2019, `2019 REC %` >= 0.35), color = "dark cyan", se = FALSE) +
+#   geom_smooth(data = filter(rb_2019, `2019 REC %` < 0.35), color = "dark red", se = FALSE)
+#   scale_color_discrete(name = "2019 R:C ratio", labels = c("< 0.35", ">= 0.35", "NA")) +
+#   scale_size_continuous(name = "2019 Carries") +
+#   xlab("2019 Fantasy Points") +
+#   ylab("2019 Receptions")
 
-  
+
   
