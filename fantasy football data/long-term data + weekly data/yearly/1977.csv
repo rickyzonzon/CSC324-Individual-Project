@@ -1,4 +1,4 @@
-,Player,Tm,Pos,Age,G,GS,PassCmp,PassAtt,PassYds,PassInt,RushAtt,RushYds,Rec,RecYds,Y/R,Fumbles,FumblesLost,PassingYds,PassingTD,PassingAtt,RushingYds,RushingTD,RushingAtt,ReceivingYds,ReceivingTD,FantasyPoints
+,Player,Tm,Pos,Age,G,GS,Cmp,Att,Yds,Int,Att,Yds,Rec,Yds,Y/R,Fumbles,FumblesLost,PassingYds,PassingTD,PassingAtt,RushingYds,RushingTD,RushingAtt,ReceivingYds,ReceivingTD,FantasyPoints
 0,Walter Payton,CHI,RB,23.0,14.0,14.0,0.0,0.0,0.0,0.0,339.0,1852.0,27.0,269.0,9.96,11.0,0.0,0.0,0.0,0.0,1852.0,14.0,339.0,269.0,2.0,313.1
 1,Lydell Mitchell,BAL,RB,28.0,14.0,14.0,0.0,0.0,0.0,0.0,301.0,1159.0,71.0,620.0,8.73,5.0,0.0,0.0,0.0,0.0,1159.0,3.0,301.0,620.0,4.0,280.9
 2,Nat Moore,MIA,WR,26.0,14.0,14.0,0.0,0.0,0.0,0.0,14.0,89.0,52.0,765.0,14.71,0.0,0.0,0.0,0.0,0.0,89.0,1.0,14.0,765.0,12.0,215.4

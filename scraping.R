@@ -2,8 +2,8 @@ library(xml2)
 library(rvest)
 library(dplyr)
 
-superflex_page <- "https://www.footballdb.com/fantasy-football/index.html?pos=OFF&yr=2021&wk=all&key=b6406b7aea3872d5bb677f064673c57f"
-kicker_page <- "https://www.footballdb.com/fantasy-football/index.html?pos=K&yr=2021&wk=all&key=b6406b7aea3872d5bb677f064673c57f"
+#superflex_page <- "https://www.footballdb.com/fantasy-football/index.html?pos=OFF&yr=2021&wk=all&key=b6406b7aea3872d5bb677f064673c57f"
+#kicker_page <- "https://www.footballdb.com/fantasy-football/index.html?pos=K&yr=2021&wk=all&key=b6406b7aea3872d5bb677f064673c57f"
 #defense_page <- "https://www.footballdb.com/fantasy-football/index.html?pos=DST&yr=2021&wk=all&key=b6406b7aea3872d5bb677f064673c57f"
 defense_page <- "fantasy football data/defense.html"
 
