@@ -2,6 +2,7 @@ library(shiny)
 library(shinythemes)
 library(shinydashboard)
 library(shinyWidgets)
+library(shinyjs)
 library(tidyverse)
 
 ui <- dashboardPage(skin = "blue",
@@ -53,29 +54,63 @@ ui <- dashboardPage(skin = "blue",
                   .nav-tabs-custom .nav-tabs li a{color:#fff;}
                   .nav-tabs-custom .nav-tabs li.active {border-top-color:#666666;}
                                 ")),
-                box(title = span("Plot Axes", style = "color:white;"), status = "primary", 
-                    solidHeader = TRUE, width = 6, collapsible = TRUE,
-                    column(6, 
-                           selectInput("x", label = "X-Axis", 
-                                       choices = colnames(select(all, -c("Player", "Team", "Pos", "Year"))))),
-                    column(6, 
-                           selectInput("y", label = "Y-Axis", 
-                                       choices = colnames(select(all, -c("Player", "Team", "Pos", "Year"))))),
-                    box(title = span("Other axes", style = "font-size:14px"), 
-                        status = "danger", solidHeader = FALSE, width = 12, 
-                        collapsible = TRUE, collapsed = TRUE
-                        # checkboxInput("color_axes", label = "Color"),
-                        # selectInput("a", label = NULL, width = "60%", choices = c())
-                        # actionButton("add_axes", label = NULL, icon = icon("plus")),
-                        # actionButton("remove_axes", label = NULL, icon = icon("minus"))
+                
+                box(title = span("Plot", style = "color:white;"), status = "primary", 
+                    solidHeader = TRUE, width = 8,
+                    dropdownButton(
+                      useShinyjs(),
+                      
+                      h4("Plot Options"),
+                      
+                      radioGroupButtons("plot_type", label = NULL, #turn into toggle if cant think of any other plots (pie?)
+                                        choices = c("Scatterplot", "Histogram", "Pie Chart"), #maybe do aesthetic options (like smooth line)
+                                        selected = "Scatterplot"),                #instead of diff plots
+                      
+                      selectInput("x", label = "X-Axis", 
+                                  choices = colnames(select(all, -c("Player", "Team", "Pos", "Year")))),
+                      
+                      selectInput("y", label = "Y-Axis", 
+                                  choices = colnames(select(all, -c("Player", "Team", "Pos", "Year")))),
+                      
+                      #selectInput("color"),
+                        #color picker?
+                      
+                      #selectInput("size"),
+                      
+                      #switchInput("smooth_line"),
+                        #
+                      
+                      circle = TRUE, status = "primary", size = "sm",
+                      icon = icon("gear"), width = "300px",
+                      
+                      tooltip = tooltipOptions(title = "Click to see inputs !")
                     ),
-                    
-                        # options for plot features (smooth line, se = TRUE, etc.)
-                    actionButton("apply_axes", label = "Apply", justified = TRUE)
+                    plotOutput("wizard_plot")
+                    # actionButton("download", label = "Download Plot")
                 ),
+                # box(title = span("Plot Axes", style = "color:white;"), status = "primary", 
+                #     solidHeader = TRUE, width = 6, collapsible = TRUE,
+                #     column(6, 
+                #            selectInput("x", label = "X-Axis", 
+                #                        choices = colnames(select(all, -c("Player", "Team", "Pos", "Year"))))),
+                #     column(6, 
+                #            selectInput("y", label = "Y-Axis", 
+                #                        choices = colnames(select(all, -c("Player", "Team", "Pos", "Year"))))),
+                #     box(title = span("Other axes", style = "font-size:14px"), 
+                #         status = "danger", solidHeader = FALSE, width = 12, 
+                #         collapsible = TRUE, collapsed = TRUE
+                #         # checkboxInput("color_axes", label = "Color"),
+                #         # selectInput("a", label = NULL, width = "60%", choices = c())
+                #         # actionButton("add_axes", label = NULL, icon = icon("plus")),
+                #         # actionButton("remove_axes", label = NULL, icon = icon("minus"))
+                #     ),
+                #     
+                #         # options for plot features (smooth line, se = TRUE, etc.)
+                #     actionButton("apply_axes", label = "Apply", justified = TRUE)
+                # ),
                 tabBox(title = span("Filters", style = "color:white;"), id = "filters", 
-                       selected = "Basic", side = "right",
-                       tabPanel("Advanced",
+                       width = 4, selected = "Basic", side = "right",
+                       tabPanel("Custom",
                                 textInput("test", "Test")),
                        tabPanel("Basic",
                                 selectizeInput("players", label = "Players", 
@@ -120,15 +155,17 @@ ui <- dashboardPage(skin = "blue",
                                 sliderInput("years", label = "Years", 1970, 2019, 
                                             value = c(1970, 2019), width = "100%",
                                             animate = TRUE),
-                                actionButton("apply_filter", label = "Apply")
+                                actionButton("apply_filter", label = "Apply"),
+                                actionButton("clear_filter", label = "Clear")
                        )
                 )
               ),
               fluidRow(
-                box(title = span("Plot", style = "color:white;"), status = "primary", 
-                    solidHeader = TRUE, width = 12, 
-                    plotOutput("wizard_plot")
-                    # actionButton("download", label = "Download Plot")
+                box(title = span("Player", style = "color:white;"), status = "primary", 
+                    solidHeader = TRUE, width = 6, collapsible = TRUE,
+                    selectizeInput("player", label = "Player", 
+                                   choices = NULL, width = "100%"),
+                    plotOutput("radar_plot")
                 )
               )
       )
@@ -138,6 +175,11 @@ ui <- dashboardPage(skin = "blue",
 
 server <- function(input, output, session) {
   updateSelectizeInput(session, "players", choices = unique(all$Player), server = TRUE)
+  updateSelectizeInput(session, "player", choices = unique(all$Player), server = TRUE)
+  
+  type <- reactive({
+    input$plot_type
+  })
   
   x <- reactive({
     input$x
@@ -147,13 +189,23 @@ server <- function(input, output, session) {
     input$y
   })
   
-  #observeEvent(input$apply_axes,
-  #             {
-                 output$wizard_plot <- renderPlot({
-                   ggplot(all, aes_string(x(), y())) +
-                     geom_point(position = "jitter")})
-  #             })
-  
+  observeEvent(type(), {
+    if (type() == "Histogram"){
+      hide("y")
+      output$wizard_plot <- renderPlot({
+        ggplot(all, aes_string(x())) +
+          geom_histogram()
+      })
+    }
+    else{
+      show("y")
+      output$wizard_plot <- renderPlot({
+        ggplot(all, aes_string(x(), y())) +
+          geom_jitter()
+      })
+    }
+  })
+
   # observeEvent(input$year_option,
   #              {
   #                if (year_option() == "Multiple")
