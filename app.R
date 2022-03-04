@@ -3,6 +3,7 @@ library(shinythemes)
 library(shinydashboard)
 library(shinyWidgets)
 library(tidyverse)
+library(fmsb)
 
 ui <- dashboardPage(skin = "blue",
   dashboardHeader(title = strong("Fvntvsy Footbvll Vis")),
@@ -53,37 +54,54 @@ ui <- dashboardPage(skin = "blue",
                   .nav-tabs-custom .nav-tabs li a{color:#fff;}
                   .nav-tabs-custom .nav-tabs li.active {border-top-color:#666666;}
                                 ")),
-                box(title = span("Plot Axes", style = "color:white;"), status = "primary", 
-                    solidHeader = TRUE, width = 6, collapsible = TRUE,
-                    column(6, 
-                           selectInput("x", label = "X-Axis", 
-                                       choices = colnames(select(all, -c("Player", "Team", "Pos", "Year"))))),
-                    column(6, 
-                           selectInput("y", label = "Y-Axis", 
-                                       choices = colnames(select(all, -c("Player", "Team", "Pos", "Year"))))),
-                    box(title = span("Other axes", style = "font-size:14px"), 
-                        status = "danger", solidHeader = FALSE, width = 12, 
-                        collapsible = TRUE, collapsed = TRUE
-                        # checkboxInput("color_axes", label = "Color"),
-                        # selectInput("a", label = NULL, width = "60%", choices = c())
-                        # actionButton("add_axes", label = NULL, icon = icon("plus")),
-                        # actionButton("remove_axes", label = NULL, icon = icon("minus"))
+                
+                box(title = span("Plot", style = "color:white;"), status = "primary", 
+                    solidHeader = TRUE, width = 8, height = "50%",
+                    dropdownButton(
+                      h4("Plot Options"),
+                      
+                      selectInput("plot_x", label = "X-Axis", 
+                                  choices = colnames(select(all, -c(Player, Team, Pos, Year)))),
+                      
+                      selectInput("plot_y", label = "Y-Axis", 
+                                  choices = colnames(select(all, -c(Player, Team, Pos, Year)))),
+
+                      #selectInput("color", choices = colnames(all)),
+                        #color picker?
+                        #expression 
+                      #selectInput("size"),
+                        #expression
+                      #switchInput("smooth_line"),
+                        #expression optional
+                      
+                      circle = TRUE, status = "primary", size = "sm",
+                      icon = icon("gear"), width = "300px",
+                      
+                      tooltip = tooltipOptions(title = "Click to see inputs !")
                     ),
-                    
-                        # options for plot features (smooth line, se = TRUE, etc.)
-                    actionButton("apply_axes", label = "Apply", justified = TRUE)
+                    plotOutput("wizard_plot")
+                    # actionButton("download", label = "Download Plot")
                 ),
                 tabBox(title = span("Filters", style = "color:white;"), id = "filters", 
-                       selected = "Basic", side = "right",
-                       tabPanel("Advanced",
-                                textInput("test", "Test")),
+                       width = 4, selected = "Basic", side = "right",
+                       tabPanel("Custom",
+                                h4("Edit filters"),
+                                fluidRow(
+                                  column(9,
+                                         textInput("custom_filter", label = NULL, 
+                                                   placeholder = "Write filter...", 
+                                                   width = "100%")),
+                                  column(1,
+                                         actionButton("remove_axes", label = NULL, 
+                                                      icon = icon("minus")))),
+                                actionButton("add_axes", label = NULL, icon = icon("plus"))),
                        tabPanel("Basic",
-                                selectizeInput("players", label = "Players", 
+                                selectizeInput("player_filter", label = "Players", 
                                                choices = NULL, width = "100%",
                                                multiple = TRUE),
                                 #################### players with same name
                                 column(6, 
-                                       selectInput("position", label = "Positions", 
+                                       selectInput("position_filter", label = "Positions", 
                                                    choices = c("Running Back", 
                                                                "Quarterback", 
                                                                "Wide Receiver",
@@ -92,7 +110,7 @@ ui <- dashboardPage(skin = "blue",
                                                    width = "100%", multiple = TRUE)),
                                 #################### players with position '0' -> interpret as multiple/ambigious
                                 column(6, 
-                                       selectInput("teams", label = "Teams",
+                                       selectInput("team_filter", label = "Teams",
                                                    choices = c("ARI Cardinals", "ATL Falcons" = "ATL",
                                                                "BAL Ravens", "BUF Bills",
                                                                "CAR Panthers", "CHI Bears",
@@ -117,18 +135,25 @@ ui <- dashboardPage(skin = "blue",
                                 # Patriots: BOS NWE
                                 # Cardinals: ARI CAR
                                 # Multiple: 2TM 3TM 4TM
-                                sliderInput("years", label = "Years", 1970, 2019, 
+                                sliderInput("year_filter", label = "Years", 1970, 2019, 
                                             value = c(1970, 2019), width = "100%",
                                             animate = TRUE),
-                                actionButton("apply_filter", label = "Apply")
+                                actionButton("apply_filter", label = "Apply"),
+                                actionButton("clear_filter", label = "Clear")
                        )
                 )
               ),
+              
+############################## Player Radar Chart
+              
               fluidRow(
-                box(title = span("Plot", style = "color:white;"), status = "primary", 
-                    solidHeader = TRUE, width = 12, 
-                    plotOutput("wizard_plot")
-                    # actionButton("download", label = "Download Plot")
+                box(title = span("Player", style = "color:white;"), status = "primary", 
+                    solidHeader = TRUE, width = 8, height = "50%", collapsible = TRUE,
+                    selectizeInput("player_radar", label = "Player", 
+                                   choices = c("Select up to three..." = ""), 
+                                   multiple = TRUE, width = "100%",
+                                   options = list(maxItems = 3)),
+                    plotOutput("radar_plot", height = "500px")
                 )
               )
       )
@@ -137,23 +162,93 @@ ui <- dashboardPage(skin = "blue",
 )
 
 server <- function(input, output, session) {
-  updateSelectizeInput(session, "players", choices = unique(all$Player), server = TRUE)
   
-  x <- reactive({
-    input$x
+  updateSelectizeInput(session, "player_filter", choices = unique(all[, 1, drop = TRUE]), server = TRUE)
+  
+############################## Player Radar Chart
+  
+  playerYear <- function(p, y){
+    return(paste(p, y, sep = " - "))
+  }
+  
+  uniquePlayerYear <- function(data){
+    return(reduce(select(data, Player, Year), playerYear))
+  }
+  
+  radar_choices <- set_names(1:length(radardata[, 1, drop = TRUE]), uniquePlayerYear(radardata))
+  
+  updateSelectizeInput(session, "player_radar", choices = radar_choices, server = TRUE)
+  
+  plotradar <- reactive({
+    input$player_radar
   })
   
-  y <- reactive({
-    input$y
+  output$radar_plot <- renderPlot({
+    if(length(plotradar()) > 0){
+      
+      r_players <- c()
+      r_positions <- c()
+      r_years <- c()
+      playerdata <- NULL
+      radar_legend <- c()
+
+      for (i in 1:length(plotradar())){
+        selection <- plotradar()[i]
+        
+        r_players <- c(r_players, radardata[selection, 1, drop = TRUE])
+        r_positions <- c(r_positions, radardata[selection, 2, drop = TRUE])
+        r_years <- c(r_years, radardata[selection, 3, drop = TRUE])
+        
+        playerdata <- bind_rows(playerdata, filter(radardata, Player == r_players[i],
+                                                   Pos == r_positions[i],
+                                                   Year == r_years[i]))
+        
+        radar_legend <- c(radar_legend, names(radar_choices)[as.integer(selection)])
+      }
+      
+      playerdata <- select(playerdata, -c(Player, Pos, Year))
+      posdata <- select(filter(radardata, Pos %in% r_positions), -c(Player, Pos, Year))
+
+      data <- rbind(c(max(posdata$PassCmp), max(posdata$CmpPct),
+                      max(posdata$PassYds), max(posdata$PassTD), min(posdata$Int),
+                      max(posdata$RushAtt), max(posdata$RushAvg), max(posdata$RushYds),
+                      max(posdata$RushTD), min(posdata$FumblesLost), max(posdata$Rec),
+                      max(posdata$RecPct), max(posdata$RecYds), max(posdata$RecTD)),
+                    c(min(posdata$PassCmp), min(posdata$CmpPct),
+                      min(posdata$PassYds), min(posdata$PassTD), max(posdata$Int),
+                      min(posdata$RushAtt), min(posdata$RushAvg), min(posdata$RushYds),
+                      min(posdata$RushTD), max(posdata$FumblesLost), min(posdata$Rec),
+                      min(posdata$RecPct), min(posdata$RecYds), min(posdata$RecTD)),
+                    playerdata)
+
+      stroke <- c( rgb(0.2,0.5,0.5,0.9), rgb(0.8,0.2,0.5,0.9), rgb(0.7,0.5,0.1,0.9) )
+      fill <- c( rgb(0.2,0.5,0.5,0.4), rgb(0.8,0.2,0.5,0.4), rgb(0.7,0.5,0.1,0.4) )
+
+      radarchart(data, pcol = stroke, pfcol = fill, plwd = 3, cglcol = "grey",
+                 cglty = 1, cglwd = 1, vlcex = 1)
+      
+      legend(x = 1.2, y = 1, legend = radar_legend, bty = "n", pch = 20,
+             col = fill, text.col = "grey", cex = 1.2, pt.cex = 3)
+    }
   })
   
-  #observeEvent(input$apply_axes,
-  #             {
-                 output$wizard_plot <- renderPlot({
-                   ggplot(all, aes_string(x(), y())) +
-                     geom_point(position = "jitter")})
-  #             })
-  
+  # observeEvent(type(), {
+  #   if (type() == "Histogram"){
+  #     hide("y")
+  #     output$wizard_plot <- renderPlot({
+  #       ggplot(all, aes_string(x())) +
+  #         geom_histogram()
+  #     })
+  #   }
+  #   else{
+  #     show("y")
+  #     output$wizard_plot <- renderPlot({
+  #       ggplot(all, aes_string(x(), y())) +
+  #         geom_jitter()
+  #     })
+  #   }
+  # })
+
   # observeEvent(input$year_option,
   #              {
   #                if (year_option() == "Multiple")

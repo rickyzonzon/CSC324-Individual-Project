@@ -20,8 +20,6 @@ rb_2019 <- mutate(select(raw_rb, `PLAYER NAME`, `2019 CAR`, `2019 RUSH YDS`,
                   `2019 CAR %` = `2019 CAR` / `2019 REC`,
                   `2019 REC %` = 1 / `2019 CAR %`)
 
-  # fix the long term datasets (repetitive data + bad variable naming)
-
 # plot stuff
 
 # ggplot(rb_2019, aes(x = `2019 FPTS`, y = `2019 REC`)) +
