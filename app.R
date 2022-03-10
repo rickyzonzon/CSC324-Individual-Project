@@ -2,6 +2,8 @@ library(shiny)
 library(shinythemes)
 library(shinydashboard)
 library(shinyWidgets)
+library(shinyjs)
+library(shinyBS)
 library(tidyverse)
 library(fmsb)
 
@@ -9,151 +11,193 @@ ui <- dashboardPage(skin = "blue",
   dashboardHeader(title = strong("Fvntvsy Footbvll Vis")),
   dashboardSidebar(
     sidebarMenu(
-      menuItem("Dvshbovrd", tabName = "dashboard", icon = icon("dashboard")),
-      menuItem("Stvt Wizvrd", tabName = "wizard", icon = icon("hat-wizard")) #icon("th")
+      menuItem("Dashboard", tabName = "dashboard", icon = icon("th")),
+      menuItem("Stat Wizard", tabName = "wizard", icon = icon("hat-wizard")),
+      menuItem("Player Wizard", tabName = "player", icon = icon("football-ball"))
     )
   ),
   dashboardBody(
     tabItems(
       tabItem(tabName = "dashboard",
-              fluidPage(theme = shinytheme("lumen"),
-                        # dashboard
-                          # examples
-                            # radar chart!
-                            # fact wizard
-                            # image wizard
-                        
-                        # selectInput("dataset", label = "Dataset", choices = 1970:2019),
-                        # verbatimTextOutput("summary"),
-                        # tableOutput("table"),
-                        # sliderInput("x", label = "If x is", min = 1, max = 50, value = 30),
-                        # "then x times 5 is",
-                        # textOutput("product")
+              fluidPage(theme = shinytheme("lumen")),
+              fluidRow(
+                imageOutput("dashboard1", inline = TRUE),
+                imageOutput("dashboard2", inline = TRUE)
+              ),
+              fluidRow(
+                imageOutput("dashboard3", inline = TRUE),
+                imageOutput("dashboard4", inline = TRUE)
               )
       ),
-      
       tabItem(tabName = "wizard",
-              fluidRow(
-                tags$style(HTML("
-                  .box.box-solid.box-primary>.box-header{
-                    color:#fff;
-                    background:#666666
-                  }
-                  
-                  .box.box-solid.box-primary{
-                    border:0px;
-                  }
-                  
-                  .box.box-danger{border-top-color:#666666;}
-
-                  .nav-tabs {background: #666666;}
-                  .nav-tabs-custom .nav-tabs li.active:hover a, .nav-tabs-custom .nav-tabs li.active a{
-                    background-color: #fff;
-                    border-color: #fff;                                                      
-                  }
-                  .nav-tabs-custom .nav-tabs li a{color:#fff;}
-                  .nav-tabs-custom .nav-tabs li.active {border-top-color:#666666;}
-                                ")),
+              useShinyjs(),
+              tags$style(HTML("
+                .box.box-solid.box-primary>.box-header{
+                  color:#fff;
+                  background:#666666
+                }
                 
-                box(title = span("Plot", style = "color:white;"), status = "primary", 
-                    solidHeader = TRUE, width = 8, height = "50%",
-                    dropdownButton(
-                      h4("Plot Options"),
-                      
-                      selectInput("plot_x", label = "X-Axis", 
-                                  choices = colnames(select(all, -c(Player, Team, Pos, Year)))),
-                      
-                      selectInput("plot_y", label = "Y-Axis", 
-                                  choices = colnames(select(all, -c(Player, Team, Pos, Year)))),
-
-                      #selectInput("color", choices = colnames(all)),
-                        #color picker?
-                        #expression 
-                      #selectInput("size"),
-                        #expression
-                      #switchInput("smooth_line"),
-                        #expression optional
-                      
-                      circle = TRUE, status = "primary", size = "sm",
-                      icon = icon("gear"), width = "300px",
-                      
-                      tooltip = tooltipOptions(title = "Click to see inputs !")
+                .box.box-solid.box-primary{
+                  border:0px;
+                }
+                
+                .box.box-danger{border-top-color:#666666;}
+  
+                .nav-tabs {background: #666666;}
+                .nav-tabs-custom .nav-tabs li.active:hover a, .nav-tabs-custom .nav-tabs li.active a{
+                  background-color: #fff;
+                  border-color: #fff;                                                      
+                }
+                .nav-tabs-custom .nav-tabs li a{color:#fff;}
+                .nav-tabs-custom .nav-tabs li.active {border-top-color:#666666;}
+                
+                .col-sm-2 {padding-right:5px;}
+                .col-sm-3 {padding-right:5px;}
+                .col-sm-4 {padding-right:5px;}
+              ")),
+              fluidRow(
+                box(id = "plot", title = span("Plot", style = "color:white;"), status = "primary", 
+                    solidHeader = TRUE, width = 7, height = "100%",
+                    tags$div(title = "Click to see plot options",
+                             dropdownButton(
+                               h4("Plot Options"),
+                               
+                               selectInput("plot_x", label = "X-Axis", 
+                                           choices = colnames(select(all, -c(Player, Team, Pos)))),
+                               
+                               selectInput("plot_y", label = "Y-Axis", 
+                                           choices = colnames(select(all, -c(Player, Team, Pos)))),
+                               
+                               selectInput("plot_color", label = "Color",
+                                           choices = c("NONE", "CUSTOM", 
+                                                       colnames(select(all, -c(Player, Team))))),
+                               
+                               selectInput("plot_alpha", label = "Alpha",
+                                           choices = c("NONE", "CUSTOM", 
+                                                       colnames(select(all, -c(Player, Team))))),
+                               
+                               selectInput("plot_size", label = "Size",
+                                           choices = c("NONE", "CUSTOM",
+                                                       colnames(select(all, -c(Player, Team))))),
+                               
+                               switchInput("plot_smooth_line", label = "Smooth Line"),
+                               
+                               switchInput("plot_smooth_ci", label = "Confidence Interval"),
+                               
+                               sliderInput("plot_smooth_span", label = "Wiggle (Span)",
+                                           0, 1, 0.75, 0.01),
+                               
+                               circle = TRUE, status = "primary", size = "sm",
+                               icon = icon("gear"), width = "300px"
+                             )
                     ),
-                    plotOutput("wizard_plot")
-                    # actionButton("download", label = "Download Plot")
+                    plotOutput("wizard_plot", height = "500px", brush = brushOpts(id = "plot_brush")),
+                    uiOutput("brush_info")
                 ),
-                tabBox(title = span("Filters", style = "color:white;"), id = "filters", 
-                       width = 4, selected = "Basic", side = "right",
+                tabBox(id = "filters", title = span("Filters", style = "color:white;"),
+                       width = 5, selected = "Basic", side = "right",
                        tabPanel("Custom",
                                 h4("Edit filters"),
-                                fluidRow(
-                                  column(9,
-                                         textInput("custom_filter", label = NULL, 
-                                                   placeholder = "Write filter...", 
-                                                   width = "100%")),
-                                  column(1,
-                                         actionButton("remove_axes", label = NULL, 
-                                                      icon = icon("minus")))),
-                                actionButton("add_axes", label = NULL, icon = icon("plus"))),
+                                # box(id = "custom1", title = "Custom Filter 1", status = "danger", 
+                                #     width = 12,
+                                #     fluidRow(
+                                #       column(3,
+                                #              selectInput("variable1", 
+                                #                          label = "Variable", 
+                                #                          choices = colnames(all))),
+                                #       column(2,
+                                #              selectInput("operation1", 
+                                #                          label = "Operation",
+                                #                          choices = c(">", "<", "==", "<=", ">="))),
+                                #       column(5,
+                                #              textInput("expression1", 
+                                #                        label = "Expression")),
+                                #       column(1,
+                                #              actionButton("remove_axes", label = NULL,
+                                #                           icon = icon("minus")))
+                                #     ),
+                                # ),
+                                actionButton("add_filter", label = NULL, icon = icon("plus"))
+                       ),
                        tabPanel("Basic",
                                 selectizeInput("player_filter", label = "Players", 
                                                choices = NULL, width = "100%",
                                                multiple = TRUE),
-                                #################### players with same name
                                 column(6, 
                                        selectInput("position_filter", label = "Positions", 
-                                                   choices = c("Running Back", 
-                                                               "Quarterback", 
-                                                               "Wide Receiver",
-                                                               "Tight End",
-                                                               "Other/Multiple"),
+                                                   choices = c("Running Back" = "RB", 
+                                                               "Quarterback" = "QB", 
+                                                               "Wide Receiver" = "WR",
+                                                               "Tight End" = "TE",
+                                                               "Other/Multiple" = "0"),
                                                    width = "100%", multiple = TRUE)),
-                                #################### players with position '0' -> interpret as multiple/ambigious
                                 column(6, 
                                        selectInput("team_filter", label = "Teams",
-                                                   choices = c("ARI Cardinals", "ATL Falcons" = "ATL",
-                                                               "BAL Ravens", "BUF Bills",
-                                                               "CAR Panthers", "CHI Bears",
-                                                               "CIN Bengals", "CLE Browns",
-                                                               "DAL Cowboys", "DEN Broncos",
-                                                               "DET Lions", "GB Packers",
-                                                               "HOU Texans", "IND Colts",
-                                                               "JAX Jaguars", "KC Chiefs",
-                                                               "LV Raiders", "LAR Rams",
-                                                               "LAC Chargers", "MIA Dolphins",
-                                                               "MIN Vikings", "NWE Patriots",
-                                                               "NOL Saints", "NYG Giants",
-                                                               "NYJ Jets", "PHI Eagles",
-                                                               "PIT Steelers", "SF 49ers",
-                                                               "STL Seahawks", "TB Buccaneers",
-                                                               "TEN Titans", "WAS Commanders"),
+                                                   choices = c("ARI Cardinals" = c("ARI", "PHO", "STL"), 
+                                                               "ATL Falcons" = c("ATL"),
+                                                               "BAL Ravens" = c("BAL"), 
+                                                               "BUF Bills" = c("BUF"),
+                                                               "CAR Panthers" = c("CAR"), 
+                                                               "CHI Bears" = c("CHI"),
+                                                               "CIN Bengals" = c("CIN"), 
+                                                               "CLE Browns" = c("CLE"),
+                                                               "DAL Cowboys" = c("DAL"), 
+                                                               "DEN Broncos" = c("DEN"),
+                                                               "DET Lions" = c("DET"), 
+                                                               "GB Packers" = c("GNB"),
+                                                               "HOU Texans" = c("HOU"), 
+                                                               "IND Colts" = c("IND"),
+                                                               "JAX Jaguars" = c("JAX"), 
+                                                               "KC Chiefs" = c("KAN"),
+                                                               "LV Raiders" = c("OAK", "RAI"), 
+                                                               "LAR Rams" = c("RAM", "LAR"),
+                                                               "LAC Chargers" = c("SDG", "LAC"), 
+                                                               "MIA Dolphins" = c("MIA"),
+                                                               "MIN Vikings" = c("MIN"), 
+                                                               "NWE Patriots" = c("BOS", "NWE"),
+                                                               "NOL Saints" = c("NOR"),
+                                                               "NYG Giants" = c("NYG"),
+                                                               "NYJ Jets" = c("NYJ"),
+                                                               "PHI Eagles" = c("PHI"),
+                                                               "PIT Steelers" = c("PIT"), 
+                                                               "SF 49ers" = c("SFO"),
+                                                               "SEA Seahawks" = c("SEA"),
+                                                               "TB Buccaneers" = c("TAM"),
+                                                               "TEN Titans" = c("TEN"),
+                                                               "WAS Commanders" = c("WAS"),
+                                                               "Multiple Teams" = c("2TM", "3TM", "4TM")),
                                                    width = "100%", multiple = TRUE)),
-                                #################### teams with different acronyms over time
-                                # Chargers: SDG LAC
-                                # Raiders: OAK RAI
-                                # Rams: RAM LAR
-                                # Patriots: BOS NWE
-                                # Cardinals: ARI CAR
-                                # Multiple: 2TM 3TM 4TM
                                 sliderInput("year_filter", label = "Years", 1970, 2019, 
                                             value = c(1970, 2019), width = "100%",
                                             animate = TRUE),
-                                actionButton("apply_filter", label = "Apply"),
-                                actionButton("clear_filter", label = "Clear")
+                                actionButton("apply_filter", "Apply")
                        )
-                )
+                 )
               ),
-              
-############################## Player Radar Chart
-              
               fluidRow(
-                box(title = span("Player", style = "color:white;"), status = "primary", 
-                    solidHeader = TRUE, width = 8, height = "50%", collapsible = TRUE,
+                box(id = "plot_legend", title = span("Legend", style = "color:white;"),  
+                    status = "primary", solidHeader = TRUE, width = 7, collapsible = TRUE,
+                    verbatimTextOutput("plot_legend_text")
+                )
+              )
+      ),
+      tabItem(tabName = "player",
+              ############################## Player Radar Chart
+              fluidRow(
+                box(id = "radar", title = span("Player", style = "color:white;"), 
+                    status = "primary", solidHeader = TRUE, width = 12, height = "50%", 
+                    collapsible = TRUE,
                     selectizeInput("player_radar", label = "Player", 
                                    choices = c("Select up to three..." = ""), 
                                    multiple = TRUE, width = "100%",
                                    options = list(maxItems = 3)),
                     plotOutput("radar_plot", height = "500px")
+                )
+              ),
+              fluidRow(
+                box(id = "radar_legend", title = span("Legend", style = "color:white;"),  
+                    status = "primary", solidHeader = TRUE, width = 12, collapsible = TRUE,
+                    verbatimTextOutput("radar_legend_text")
                 )
               )
       )
@@ -162,10 +206,8 @@ ui <- dashboardPage(skin = "blue",
 )
 
 server <- function(input, output, session) {
-  
-  updateSelectizeInput(session, "player_filter", choices = unique(all[, 1, drop = TRUE]), server = TRUE)
-  
-############################## Player Radar Chart
+
+############################ FUNCTIONS ############################
   
   playerYear <- function(p, y){
     return(paste(p, y, sep = " - "))
@@ -174,6 +216,236 @@ server <- function(input, output, session) {
   uniquePlayerYear <- function(data){
     return(reduce(select(data, Player, Year), playerYear))
   }
+  
+  legendStr <- function(axes_used){
+    lgd <- ""
+    
+    for (axis in axes_used)
+      if (axis != "NONE" & axis != "CUSTOM")
+        lgd <- paste0(lgd, axis, " = ", descriptions[[axis]], "\n")
+    
+    return(lgd)
+  }
+  
+############################ DASHBOARD ############################
+  
+  dashboard_images <- c("output/rb-wr-targets-vs-fpts.png",
+                        "output/mvp-rushing-qbs.png",
+                        "output/christian-mccaffrey-career.png",
+                        "output/qb-rushing-vs-fpts.png")
+  
+  output$dashboard1 <- renderImage({
+    list(src = dashboard_images[1])
+  }, deleteFile = FALSE)
+  
+  output$dashboard2 <- renderImage({
+    list(src = dashboard_images[2])
+  }, deleteFile = FALSE)
+  
+  output$dashboard3 <- renderImage({
+    list(src = dashboard_images[3])
+  }, deleteFile = FALSE)
+  
+  output$dashboard4 <- renderImage({
+    list(src = dashboard_images[4])
+  }, deleteFile = FALSE)
+  
+########################### STAT WIZARD ###########################
+
+################### Filters
+  
+  player_filter_choices <-  unique(all[, 1, drop = TRUE])
+  
+  updateSelectizeInput(session, "player_filter", choices = player_filter_choices,
+                       server = TRUE)
+  
+  #custom filter creation
+  observeEvent(input$add_filter, {
+    print("test")
+  })
+  
+  players <- reactive({
+    input$player_filter
+  })
+  
+  positions <- reactive({
+    input$position_filter
+  })
+  
+  teams <- reactive({
+    input$team_filter
+  })
+  
+  years <- reactive({
+    input$year_filter
+  })
+  
+  filtered_data <- reactiveVal(all)
+
+  observeEvent(input$apply_filter, {
+    filtered_data(all)
+    
+    if (input$filters == "Basic"){
+      if (!is.null(players()))
+        filtered_data(filter(filtered_data(), Player %in% players()))
+        
+      if (!is.null(positions()))
+        filtered_data(filter(filtered_data(), Pos %in% positions()))
+      
+      if (!is.null(teams()))
+        filtered_data(filter(filtered_data(), Team %in% teams()))
+      
+      filtered_data(filter(filtered_data(), Year >= years()[1] & Year <= years()[2]))
+    }
+    else{
+      
+    }
+  })
+  
+################## Wizard Plot
+  
+  x <- reactive({
+    input$plot_x
+  })
+
+  y <- reactive({
+    input$plot_y
+  })
+
+  color <- reactive({
+    input$plot_color
+  })
+
+  alpha <- reactive({
+    input$plot_alpha
+  })
+  
+  size <- reactive({
+    input$plot_size
+  })
+  
+  smooth <- reactive({
+    input$plot_smooth_line
+  })
+
+  se <- reactive({
+    input$plot_smooth_ci
+  })
+  
+  span <- reactive({
+    input$plot_smooth_span
+  })
+  
+  observeEvent(smooth(), {
+    if (smooth()){
+      show("plot_smooth_ci")
+      show("plot_smooth_span")
+    }
+    else{
+      hide("plot_smooth_ci")
+      hide("plot_smooth_span")
+    }
+  })
+  
+  output$wizard_plot <- renderPlot({
+    aes <- aes_string(color = ifelse(color() == "NONE", 
+                                     "NULL",
+                                     ifelse(color() == "CUSTOM",
+                                            "NULL",
+                                            color())),
+                      size = ifelse(size() == "NONE",
+                                    "NULL",
+                                    ifelse(size() == "CUSTOM", "NULL", size())),
+                      alpha = ifelse(alpha() == "NONE",
+                                     "NULL",
+                                     ifelse(alpha() == "CUSTOM", "NULL", alpha())))
+    
+    if (size() == "NONE")
+      scatter <- geom_point(mapping = aes, size = 2)
+    else
+      scatter <- geom_point(mapping = aes)
+    
+    plot <- ggplot(filtered_data(), aes_string(x(), y())) + 
+      scatter
+    
+    if (smooth())
+      if (se())
+        plot + geom_smooth(se = TRUE, method = "loess", span = span())
+      else
+        plot + geom_smooth(se = FALSE, method = "loess", span = span())
+    else
+      plot
+    
+  })
+  
+  brush <- reactive({
+    input$plot_brush
+  })
+
+  output$brush_info <- renderUI({
+    points <- brushedPoints(as.data.frame(filtered_data()), brush())
+
+    req(nrow(points) > 0)
+
+    verbatimTextOutput("info")
+  })
+  
+  output$info <- renderPrint({
+    points <- brushedPoints(as.data.frame(filtered_data()), brush())
+
+    req(nrow(points) > 0)
+    
+    axes_used <- unique(c(x(), y(), color(), alpha(), size()))
+    axes <- c()
+    
+    for (axis in axes_used)
+      if (axis != "NONE" & axis != "CUSTOM")
+        axes <- c(axes, axis)
+
+    select(points, Player, Team, Pos, Year, axes)
+  })
+
+  
+#################### Legend
+  
+  descriptions <- c("Pos" = "The position of the player.",
+                    "Age" = "The age of the player.",
+                    "Games" = "The number of games the player played in.",
+                    "GmStart" = "The number of games the player started in.",
+                    "PassCmp" = "The number of passes completed by the player.",
+                    "PassAtt" = "The number of passes thrown by the player.",
+                    "PassYds" = "The number of passing yards gained by the player.",
+                    "PassTD" = "The number of passing touchdowns scored by the player.",
+                    "Int" = "The number of interceptions thrown by the player.",
+                    "RushAtt" = "The number of rushing attempts by the player.",
+                    "RushYds" = "The number of rushing yards gained by the player.",
+                    "RushTD" = "The number of rushing touchdowns scored by the player.",
+                    "Tgt" = "The number of targets (balls thrown to) the player had. 
+                    [Note: the NFL only began tracking targets in 1992]",
+                    "Rec" = "The number of receptions (balls caught) the player had.",
+                    "RecYds" = "The number of receiving yards gained by the player.",
+                    "RecTD" = "The number of receiving touchdowns scored by the player.",
+                    "YPR" = "The number of receiving yards gained per reception by the player.",
+                    "FumblesLost" = "The number of fumbles lost by the player.",
+                    "FPTS" = "The number of fantasy points earned by the player.",
+                    "CmpPct" = "The percentage of completed passes out of total passes thrown.",
+                    "RushAvg" = "The average number of rushing yards gained per rushing attempt.",
+                    "RecPct" = "The percentages of receptions (balls caught) out of total targets 
+                    (balls thrown to). [Note: the NFL only began tracking targets in 1992]")
+
+  output$plot_legend_text <- renderText({
+    axes_used <- unique(c(x(), y(), color(), alpha(), size()))
+    lgd <- legendStr(axes_used)
+    lgd
+  })
+  
+#################### Radar Chart
+  
+  output$radar_legend_text <- renderText({
+    axes_used <- colnames(select(radardata, -c(Player, Pos, Year)))
+    lgd <- legendStr(axes_used)
+    lgd
+  })
   
   radar_choices <- set_names(1:length(radardata[, 1, drop = TRUE]), uniquePlayerYear(radardata))
   
@@ -230,44 +502,7 @@ server <- function(input, output, session) {
       legend(x = 1.2, y = 1, legend = radar_legend, bty = "n", pch = 20,
              col = fill, text.col = "grey", cex = 1.2, pt.cex = 3)
     }
-  })
-  
-  # observeEvent(type(), {
-  #   if (type() == "Histogram"){
-  #     hide("y")
-  #     output$wizard_plot <- renderPlot({
-  #       ggplot(all, aes_string(x())) +
-  #         geom_histogram()
-  #     })
-  #   }
-  #   else{
-  #     show("y")
-  #     output$wizard_plot <- renderPlot({
-  #       ggplot(all, aes_string(x(), y())) +
-  #         geom_jitter()
-  #     })
-  #   }
-  # })
-
-  # observeEvent(input$year_option,
-  #              {
-  #                if (year_option() == "Multiple")
-  #                  updateSliderInput(session, "years", value = c(years(), years() + 1))
-  #                else
-  #                  updateSliderInput(session, "years", value = years())
-  #              })
-  # dataset <- reactive({
-  #   get(input$dataset, ls(yearly))
-  # })
-  # 
-  # output$summary <- renderPrint(summary(dataset()))
-  # 
-  # output$table <- renderTable({
-  #   dataset()
-  # })
-  
-
-  #renderPlot() res = 96
+  }, res = 96)
 }
 
 shinyApp(ui, server)

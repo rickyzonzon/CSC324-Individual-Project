@@ -1,24 +1,24 @@
 library(tidyverse)
 
-raw_defense <- read_csv("fantasy football data/defense_stats_and_projections.csv")
-raw_kicker <- read_csv("fantasy football data/kicker_stats_and_projections.csv")
-raw_qb <- read_csv("fantasy football data/qb_stats_and_projections.csv")
-raw_rb <- read_csv("fantasy football data/rb_stats_and_projections.csv")
-raw_te <- read_csv("fantasy football data/te_stats_and_projections.csv")
-raw_wr <- read_csv("fantasy football data/wr_stats_and_projections.csv")
-
-
-#ggplot(data = filter(raw_kicker, `2020 FPTS` > 0)) +
-#  geom_histogram(mapping = aes(x = `2020 FPTS`), fill = "red", binwidth = 3)
-
-# mutating datasets
-rb_2019 <- mutate(select(raw_rb, `PLAYER NAME`, `2019 CAR`, `2019 RUSH YDS`, 
-                         `2019 RUSH AVG`, `2019 RUSH TD`, `2019 REC`, 
-                         `2019 REC YDS`, `2019 REC TDS`, `2019 FPTS`),
-                  `2019 ALL YDS` = `2019 RUSH YDS` + `2019 REC YDS`,
-                  `2019 ALL TCH` = `2019 REC` + `2019 CAR`,
-                  `2019 CAR %` = `2019 CAR` / `2019 REC`,
-                  `2019 REC %` = 1 / `2019 CAR %`)
+# raw_defense <- read_csv("fantasy football data/defense_stats_and_projections.csv")
+# raw_kicker <- read_csv("fantasy football data/kicker_stats_and_projections.csv")
+# raw_qb <- read_csv("fantasy football data/qb_stats_and_projections.csv")
+# raw_rb <- read_csv("fantasy football data/rb_stats_and_projections.csv")
+# raw_te <- read_csv("fantasy football data/te_stats_and_projections.csv")
+# raw_wr <- read_csv("fantasy football data/wr_stats_and_projections.csv")
+# 
+# 
+# #ggplot(data = filter(raw_kicker, `2020 FPTS` > 0)) +
+# #  geom_histogram(mapping = aes(x = `2020 FPTS`), fill = "red", binwidth = 3)
+# 
+# # mutating datasets
+# rb_2019 <- mutate(select(raw_rb, `PLAYER NAME`, `2019 CAR`, `2019 RUSH YDS`, 
+#                          `2019 RUSH AVG`, `2019 RUSH TD`, `2019 REC`, 
+#                          `2019 REC YDS`, `2019 REC TDS`, `2019 FPTS`),
+#                   `2019 ALL YDS` = `2019 RUSH YDS` + `2019 REC YDS`,
+#                   `2019 ALL TCH` = `2019 REC` + `2019 CAR`,
+#                   `2019 CAR %` = `2019 CAR` / `2019 REC`,
+#                   `2019 REC %` = 1 / `2019 CAR %`)
 
 # plot stuff
 
@@ -46,4 +46,6 @@ rb_2019 <- mutate(select(raw_rb, `PLAYER NAME`, `2019 CAR`, `2019 RUSH YDS`,
 
   # plotting relationship between rb fantasy points vs receiving vs rushing over time
 
-  
+ggplot(all, aes(x = PassTD, y = PassAtt)) +
+  geom_jitter(aes(color = PassCmp))
+

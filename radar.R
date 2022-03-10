@@ -10,16 +10,16 @@ is.infinite.df <- function(x)
 radardata <- all %>%
   select(Player, Pos, Year, PassCmp, PassAtt, PassYds, PassTD, Int, RushAtt, RushYds, 
          RushTD, Tgt, Rec, RecYds, RecTD, FumblesLost) %>%
-  mutate(CmpPct = PassCmp / PassAtt,
-         .after = PassAtt) %>%
-  mutate(RushAvg = ifelse(RushAtt == 0, RushYds, RushYds / RushAtt),
-         .after = RushAtt) %>%
-  mutate(RecPct = ifelse(Tgt == 0 | is.na(Tgt), 0, Rec / Tgt),
-         .after = Rec) %>%
-  mutate(PassAtt = NULL,
-         Tgt = NULL) %>%
-  relocate(FumblesLost, .after = RushTD) %>%
-  replace(is.nan.df(.), 0)
+  # mutate(CmpPct = PassCmp / PassAtt,
+  #        .after = PassAtt) %>%
+  # mutate(RushAvg = ifelse(RushAtt == 0, RushYds, RushYds / RushAtt),
+  #        .after = RushAtt) %>%
+  # mutate(RecPct = ifelse(Tgt == 0 | is.na(Tgt), 0, Rec / Tgt),
+  #        .after = Rec) %>%
+  # mutate(PassAtt = NULL,
+  #        Tgt = NULL) %>%
+  relocate(FumblesLost, .after = RushTD)# %>%
+  # replace(is.nan.df(.), 0)
 
 # Pass%, PassCmp, PassYds, PassTD, Int
 # RushAtt, RushYds, YPA, RushTD, FumblesLost

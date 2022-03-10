@@ -44,7 +44,13 @@ clean <- function(dat, year, b92 = FALSE, b94 = FALSE){
         mutate(., FumblesLost = Fumbles, Fumbles = NULL) 
       else 
         mutate(., Fumbles = NULL)} %>%
-    mutate(Year = year, .after = Age)
+    mutate(Year = year, .after = Age) %>%
+    mutate(Team = ifelse(Team == "STL" & Year > 1994, "RAM", Team)) %>%
+    mutate(Age = ifelse(Age == 0, NA, Age)) %>%
+    mutate(CmpPct = PassCmp / PassAtt, .after = PassAtt) %>%
+    mutate(RushAvg = ifelse(RushAtt == 0, RushYds, RushYds / RushAtt), .after = RushAtt) %>%
+    mutate(RecPct = ifelse(Tgt == 0 | is.na(Tgt), 0, Rec / Tgt), .after = Rec) %>%
+    replace(is.nan.df(.), 0)
   
   return(new_dat)
 }
