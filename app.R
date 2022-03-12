@@ -63,22 +63,25 @@ ui <- dashboardPage(skin = "blue",
                                h4("Plot Options"),
                                
                                selectInput("plot_x", label = "X-Axis", 
-                                           choices = colnames(select(all, -c(Player, Team, Pos)))),
+                                           choices = colnames(select(all, -c(Player, Team)))),
                                
                                selectInput("plot_y", label = "Y-Axis", 
-                                           choices = colnames(select(all, -c(Player, Team, Pos)))),
+                                           choices = colnames(select(all, -c(Player, Team)))),
                                
                                selectInput("plot_color", label = "Color",
                                            choices = c("NONE", "CUSTOM", 
                                                        colnames(select(all, -c(Player, Team))))),
+                               textInput("color_expression", label = "Color Expression", width = "100%"),
                                
                                selectInput("plot_alpha", label = "Alpha",
                                            choices = c("NONE", "CUSTOM", 
                                                        colnames(select(all, -c(Player, Team))))),
+                               textInput("alpha_expression", label = "Alpha Expression", width = "100%"),
                                
                                selectInput("plot_size", label = "Size",
                                            choices = c("NONE", "CUSTOM",
                                                        colnames(select(all, -c(Player, Team))))),
+                               textInput("size_expression", label = "Size Expression", width = "100%"),
                                
                                switchInput("plot_smooth_line", label = "Smooth Line"),
                                
@@ -98,26 +101,15 @@ ui <- dashboardPage(skin = "blue",
                        width = 5, selected = "Basic", side = "right",
                        tabPanel("Custom",
                                 h4("Edit filters"),
-                                # box(id = "custom1", title = "Custom Filter 1", status = "danger", 
-                                #     width = 12,
-                                #     fluidRow(
-                                #       column(3,
-                                #              selectInput("variable1", 
-                                #                          label = "Variable", 
-                                #                          choices = colnames(all))),
-                                #       column(2,
-                                #              selectInput("operation1", 
-                                #                          label = "Operation",
-                                #                          choices = c(">", "<", "==", "<=", ">="))),
-                                #       column(5,
-                                #              textInput("expression1", 
-                                #                        label = "Expression")),
-                                #       column(1,
-                                #              actionButton("remove_axes", label = NULL,
-                                #                           icon = icon("minus")))
-                                #     ),
-                                # ),
-                                actionButton("add_filter", label = NULL, icon = icon("plus"))
+                                uiOutput("custom_filter_1"),
+                                uiOutput("custom_filter_2"),
+                                uiOutput("custom_filter_3"),
+                                uiOutput("custom_filter_4"),
+                                uiOutput("custom_filter_5"),
+                                verbatimTextOutput("filter_error"),
+                                actionButton("apply_custom_filter", "Apply")
+                                # uiOutput("custom_filters")
+                                # actionButton("add_filter", label = NULL, icon = icon("plus"))
                        ),
                        tabPanel("Basic",
                                 selectizeInput("player_filter", label = "Players", 
@@ -168,9 +160,8 @@ ui <- dashboardPage(skin = "blue",
                                                                "Multiple Teams" = c("2TM", "3TM", "4TM")),
                                                    width = "100%", multiple = TRUE)),
                                 sliderInput("year_filter", label = "Years", 1970, 2019, 
-                                            value = c(1970, 2019), width = "100%",
-                                            animate = TRUE),
-                                actionButton("apply_filter", "Apply")
+                                            value = c(1970, 2019), width = "100%"),
+                                actionButton("apply_basic_filter", "Apply")
                        )
                  )
               ),
@@ -227,6 +218,13 @@ server <- function(input, output, session) {
     return(lgd)
   }
   
+  custom_filter_UI <- function(i){
+    return(
+        textInput(paste0("filter_expression_", i), label = paste0("Expression ", i),
+                  width = "100%")
+    )
+  }
+  
 ############################ DASHBOARD ############################
   
   dashboard_images <- c("output/rb-wr-targets-vs-fpts.png",
@@ -252,17 +250,12 @@ server <- function(input, output, session) {
   
 ########################### STAT WIZARD ###########################
 
-################### Filters
+########################################## Filters
   
   player_filter_choices <-  unique(all[, 1, drop = TRUE])
   
   updateSelectizeInput(session, "player_filter", choices = player_filter_choices,
                        server = TRUE)
-  
-  #custom filter creation
-  observeEvent(input$add_filter, {
-    print("test")
-  })
   
   players <- reactive({
     input$player_filter
@@ -282,27 +275,101 @@ server <- function(input, output, session) {
   
   filtered_data <- reactiveVal(all)
 
-  observeEvent(input$apply_filter, {
+  observeEvent(input$apply_basic_filter, {
     filtered_data(all)
     
-    if (input$filters == "Basic"){
-      if (!is.null(players()))
-        filtered_data(filter(filtered_data(), Player %in% players()))
-        
-      if (!is.null(positions()))
-        filtered_data(filter(filtered_data(), Pos %in% positions()))
-      
-      if (!is.null(teams()))
-        filtered_data(filter(filtered_data(), Team %in% teams()))
-      
-      filtered_data(filter(filtered_data(), Year >= years()[1] & Year <= years()[2]))
-    }
-    else{
-      
-    }
+    if (!is.null(players()))
+      filtered_data(filter(filtered_data(), Player %in% players()))
+    
+    if (!is.null(positions()))
+      filtered_data(filter(filtered_data(), Pos %in% positions()))
+    
+    if (!is.null(teams()))
+      filtered_data(filter(filtered_data(), Team %in% teams()))
+    
+    filtered_data(filter(filtered_data(), Year >= years()[1] & Year <= years()[2]))
   })
   
-################## Wizard Plot
+  # num_filters <- reactiveVal(0)                 # TODO: dynamic custom filter UI
+  # filter_list <- reactiveVal(list())
+  # 
+  # observeEvent(input$add_filter, {
+  #   num_filters(num_filters() + 1)
+  #   
+  #   filter_list(append(filter_list(),
+  #                      fluidRow(
+  #                        column(10,
+  #                               textInput(paste0("expression_", num_filters()), label = "Expression", 
+  #                                         width = "100%")),
+  #                        column(1,
+  #                               actionButton(paste0("remove_axes_", num_filters()), label = "",
+  #                                            icon = icon("minus")))
+  #                      )))
+  #   
+  #   output[["custom_filters"]] <- renderUI({
+  #     filter_list()
+  #   })
+  # })
+  
+  output$custom_filter_1 <- renderUI({
+    custom_filter_UI(1)
+  })
+  
+  output$custom_filter_2 <- renderUI({
+    custom_filter_UI(2)
+  })
+  
+  output$custom_filter_3 <- renderUI({
+    custom_filter_UI(3)
+  })
+  
+  output$custom_filter_4 <- renderUI({
+    custom_filter_UI(4)
+  })
+  
+  output$custom_filter_5 <- renderUI({
+    custom_filter_UI(5)
+  })
+  
+  filter_list <- lapply(1:5, function(i){
+    reactive({input[[paste0("filter_expression_", i)]]})
+  })
+  
+  observeEvent(input$apply_custom_filter, {
+    filtered_data(all)
+    errors <- reactiveVal()
+    
+    for(i in 1:length(filter_list)){
+      
+      filter_exp <- filter_list[[i]]
+      
+      if (filter_exp() != ""){
+        
+        filtered_data(
+          tryCatch(
+            filter(filtered_data(), eval(parse(text = filter_exp()))),
+            error = function(cond){
+              errors(paste0(errors(), "Expression ", i, " is invalid, and has not been included in the filter.\n"))
+              filtered_data()
+            },
+            warning = function(cond){
+              errors(paste0(errors(), "Expression ", i, " is invalid, and has not been included in the filter.\n"))
+              filtered_data()
+            }
+          )
+        )
+      }
+      else
+        errors(paste0(errors(), "Expression ", i, " is empty, and has not been included in the filter.\n"))
+    }
+    
+    print(errors())
+    
+    if (errors() != "")
+      output$filter_error <- renderText({errors()})
+  })
+  
+########################################## Wizard Plot
   
   x <- reactive({
     input$plot_x
@@ -346,6 +413,29 @@ server <- function(input, output, session) {
       hide("plot_smooth_span")
     }
   })
+  
+  observeEvent(color(), {
+    if (color() == "CUSTOM")
+      show("color_expression")
+    else
+      hide("color_expression")
+  })
+  
+  observeEvent(alpha(), {
+    if (alpha() == "CUSTOM")
+      show("alpha_expression")
+    else
+      hide("alpha_expression")
+  })
+  
+  observeEvent(size(), {
+    if (size() == "CUSTOM")
+      show("size_expression")
+    else
+      hide("size_expression")
+  })
+  
+  
   
   output$wizard_plot <- renderPlot({
     aes <- aes_string(color = ifelse(color() == "NONE", 
