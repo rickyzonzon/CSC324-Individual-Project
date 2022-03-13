@@ -429,13 +429,15 @@ server <- function(input, output, session) {
   })
   
   observeEvent(size(), {
-    if (size() == "CUSTOM")
+    if (size() == "CUSTOM"){
       show("size_expression")
+      observeEvent(input$size_expression, {
+        
+      }) 
+    }
     else
       hide("size_expression")
   })
-  
-  
   
   output$wizard_plot <- renderPlot({
     aes <- aes_string(color = ifelse(color() == "NONE", 
