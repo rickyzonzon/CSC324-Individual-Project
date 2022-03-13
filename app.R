@@ -21,6 +21,9 @@ ui <- dashboardPage(skin = "blue",
       tabItem(tabName = "dashboard",
               fluidPage(theme = shinytheme("lumen")),
               fluidRow(
+                h3(textOutput("dashboard_text"))
+              ),
+              fluidRow(
                 imageOutput("dashboard1", inline = TRUE),
                 imageOutput("dashboard2", inline = TRUE)
               ),
@@ -227,6 +230,10 @@ server <- function(input, output, session) {
   
 ############################ DASHBOARD ############################
   
+  output$dashboard_text <- renderText({
+    "Here are some examples of the visualizations you can create with this application!"
+  })
+  
   dashboard_images <- c("output/rb-wr-targets-vs-fpts.png",
                         "output/mvp-rushing-qbs.png",
                         "output/christian-mccaffrey-career.png",
@@ -363,8 +370,6 @@ server <- function(input, output, session) {
         errors(paste0(errors(), "Expression ", i, " is empty, and has not been included in the filter.\n"))
     }
     
-    print(errors())
-    
     if (errors() != "")
       output$filter_error <- renderText({errors()})
   })
@@ -462,9 +467,11 @@ server <- function(input, output, session) {
     
     if (smooth())
       if (se())
-        plot + geom_smooth(se = TRUE, method = "loess", span = span())
+        plot + geom_smooth(se = TRUE)
+        #plot + geom_smooth(se = TRUE, method = "loess", span = span())
       else
-        plot + geom_smooth(se = FALSE, method = "loess", span = span())
+        plot + geom_smooth(se = FALSE)
+        #plot + geom_smooth(se = FALSE, method = "loess", span = span())
     else
       plot
     
