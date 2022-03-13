@@ -32,7 +32,7 @@ RecPct: The percentages of receptions out of total targets. [Note: the NFL only 
 ### Source
 This data was sourced from [Fantasy Football Data Pros](https://www.fantasyfootballdatapros.com/csv_files).
 ## Audience
-
+Anyone with at least a rudimentary understanding of the American football and the NFL should be able to use this application and understand the visualizations. Fantasy football players in particular stand to benefit from the use of this tool. If they are looking to improve their performance in fantasy leagues, they can use this tool to find statistical relationships and apply that knowledge in their fantasy-related decisions.
 ## Questions
 ## Insights
 ## Future Improvements
