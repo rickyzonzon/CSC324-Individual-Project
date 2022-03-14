@@ -66,10 +66,14 @@ ui <- dashboardPage(skin = "blue",
                                h4("Plot Options"),
                                
                                selectInput("plot_x", label = "X-Axis", 
-                                           choices = colnames(select(all, -c(Player, Team)))),
+                                           choices = c("CUSTOM", colnames(select(all, -c(Player, Team)))),
+                                           selected = "Pos"),
+                               textInput("x_expression", label = "X Expression", width = "100%"),
                                
                                selectInput("plot_y", label = "Y-Axis", 
-                                           choices = colnames(select(all, -c(Player, Team)))),
+                                           choices = c("CUSTOM", colnames(select(all, -c(Player, Team)))),
+                                           selected = "Pos"),
+                               textInput("y_expression", label = "Y Expression", width = "100%"),
                                
                                selectInput("plot_color", label = "Color",
                                            choices = c("NONE", "CUSTOM", 
@@ -419,6 +423,21 @@ server <- function(input, output, session) {
     }
   })
   
+  observeEvent(x(), {
+    if (x() == "CUSTOM")
+      show("x_expression")
+    else
+      hide("x_expression")
+    
+  })
+  
+  observeEvent(y(), {
+    if (y() == "CUSTOM")
+      show("y_expression")
+    else
+      hide("y_expression")
+  })
+  
   observeEvent(color(), {
     if (color() == "CUSTOM")
       show("color_expression")
@@ -434,12 +453,8 @@ server <- function(input, output, session) {
   })
   
   observeEvent(size(), {
-    if (size() == "CUSTOM"){
+    if (size() == "CUSTOM")
       show("size_expression")
-      observeEvent(input$size_expression, {
-        
-      }) 
-    }
     else
       hide("size_expression")
   })
@@ -448,23 +463,31 @@ server <- function(input, output, session) {
     aes <- aes_string(color = ifelse(color() == "NONE", 
                                      "NULL",
                                      ifelse(color() == "CUSTOM",
-                                            "NULL",
+                                            eval(parse(text = paste0("(\'", input$color_expression, "\')"))),
                                             color())),
                       size = ifelse(size() == "NONE",
                                     "NULL",
-                                    ifelse(size() == "CUSTOM", "NULL", size())),
+                                    ifelse(size() == "CUSTOM",
+                                           eval(parse(text = paste0("('", input$size_expression, "')"))),
+                                           size())),
                       alpha = ifelse(alpha() == "NONE",
                                      "NULL",
-                                     ifelse(alpha() == "CUSTOM", "NULL", alpha())))
+                                     ifelse(alpha() == "CUSTOM",
+                                            eval(parse(text = paste0("('", input$alpha_expression, "')"))),
+                                            alpha())))
     
     if (size() == "NONE")
       scatter <- geom_point(mapping = aes, size = 2)
     else
       scatter <- geom_point(mapping = aes)
     
-    plot <- ggplot(filtered_data(), aes_string(x(), y())) + 
-      scatter
-    
+    plot <- ggplot(filtered_data(), aes_string(ifelse(x() == "CUSTOM",
+                                                      eval(parse(text = paste0("('", input$x_expression, "')"))),
+                                                      x()), 
+                                               ifelse(y() == "CUSTOM", 
+                                                      eval(parse(text = paste0("('", input$y_expression, "')"))), 
+                                                      y()))) + scatter
+
     if (smooth())
       if (se())
         plot + geom_smooth(se = TRUE)
